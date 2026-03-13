@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Bell, MapPin, Trash2, Megaphone, 
   Star, MessageCircle, Map as MapIcon, 
@@ -6,8 +6,33 @@ import {
   History, User
 } from 'lucide-react';
 import './Dashboard.css';
+import API from '../utils/api';
 
 const Dashboard = ({ onNavigate }) => {
+  const [userData, setUserData] = useState(null);
+  const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setUserData(user);
+
+    const fetchComplaints = async () => {
+      try {
+        const response = await API.get('/complaints');
+        setComplaints(response.data.data.slice(0, 3)); // Get recent 3
+      } catch (err) {
+        console.error("Error fetching dashboard complaints:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
+
+  const activeCount = complaints.filter(c => c.status !== 'Resolved').length;
+
   return (
     <div className="dashboard-screen fade-in">
       
@@ -15,12 +40,16 @@ const Dashboard = ({ onNavigate }) => {
       <header className="dashboard-header">
         <div className="profile-info">
           <img 
-            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" 
+            src={userData?.role === 'admin' 
+              ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100"
+              : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100"
+            }
             alt="User Avatar" 
             className="avatar"
+            onClick={() => onNavigate('profile')}
           />
           <div className="user-details">
-            <h2>Welcome, Alex</h2>
+            <h2>Welcome, {userData?.name?.split(' ')[0] || 'User'}</h2>
             <div className="location">
               <MapPin size={12} color="#64748b" />
               <span>Springfield, Central</span>
@@ -34,7 +63,7 @@ const Dashboard = ({ onNavigate }) => {
           </button>
           <button className="icon-btn notification-btn">
             <Bell size={20} color="#334155" />
-            <span className="badge-dot"></span>
+            {activeCount > 0 && <span className="badge-dot"></span>}
           </button>
         </div>
       </header>
@@ -66,12 +95,12 @@ const Dashboard = ({ onNavigate }) => {
           </div>
           <div className="score-title">CLEANLINESS SCORE</div>
           <div className="score-value">
-            <span className="bold">84</span>
+            <span className="bold">{75 + activeCount * 3}</span>
             <span className="light">/100</span>
           </div>
           <div className="progress-bar-container">
             <div className="progress-track">
-              <div className="progress-fill green" style={{ width: '84%' }}></div>
+              <div className="progress-fill green" style={{ width: `${75 + activeCount * 3}%` }}></div>
             </div>
           </div>
         </section>
@@ -79,18 +108,26 @@ const Dashboard = ({ onNavigate }) => {
         {/* My Complaints */}
         <section className="section-container">
           <div className="section-header">
-            <h3 className="section-title">My Complaints</h3>
-            <span className="badge purple">3 Active</span>
+            <h3 className="section-title">Latest Updates</h3>
+            <span className="badge purple" onClick={() => onNavigate('history')}>{activeCount} Active</span>
           </div>
-          <div className="complaint-card">
-            <div className="complaint-icon-wrapper orange">
-              <MessageCircle size={18} color="#ea580c" fill="#ea580c" />
-            </div>
-            <div className="complaint-details">
-              <h4>Overflowing Bin</h4>
-              <p>Submitted 2h ago</p>
-            </div>
-          </div>
+          {isLoading ? (
+            <p style={{ padding: '10px' }}>Loading updates...</p>
+          ) : complaints.length === 0 ? (
+            <p style={{ padding: '10px', color: '#64748b' }}>No recent activity.</p>
+          ) : (
+            complaints.map(complaint => (
+              <div key={complaint._id} className="complaint-card" onClick={() => onNavigate('complaintDetails', { complaintId: complaint._id })}>
+                <div className={`complaint-icon-wrapper ${complaint.status === 'Resolved' ? 'green' : 'orange'}`}>
+                  <MessageCircle size={18} color={complaint.status === 'Resolved' ? '#16a34a' : '#ea580c'} fill={complaint.status === 'Resolved' ? '#16a34a' : '#ea580c'} />
+                </div>
+                <div className="complaint-details">
+                  <h4>{complaint.detectedObject === 'none' ? 'Waste Report' : complaint.detectedObject.replace('_', ' ')}</h4>
+                  <p>{complaint.status} • {new Date(complaint.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ))
+          )}
         </section>
 
         {/* Nearby Activity */}
@@ -102,59 +139,15 @@ const Dashboard = ({ onNavigate }) => {
           <div className="map-card">
              {/* Map Image Placeholder */}
              <div className="map-placeholder">
-               <div className="map-pin-indicator">
-                 <MapPin size={16} fill="#1a2a5c" color="#ffffff" />
-               </div>
+                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=400" alt="Map" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+                <div className="map-pin-indicator" style={{ top: '50%', left: '50%' }}>
+                  <MapPin size={16} fill="#1a2a5c" color="#ffffff" />
+                </div>
              </div>
              <p className="map-footer-text">12 complaints resolved in your area this week</p>
           </div>
         </section>
 
-        {/* Nearby Issues */}
-        <section className="section-container">
-          <h3 className="section-title mb-12">Nearby Issues</h3>
-          
-          <div className="issue-card">
-            <img 
-              src="https://images.unsplash.com/photo-1605600659873-d808a1d8fb7a?auto=format&fit=crop&q=80&w=200" 
-              alt="Trash bags" 
-              className="issue-image"
-            />
-            <div className="issue-content">
-              <div className="issue-meta">
-                <span className="status-badge status-progress">IN PROGRESS</span>
-                <span className="distance">0.4 km away</span>
-              </div>
-              <h4 className="issue-title">Illegal Dumping - Oak St</h4>
-              <p className="issue-desc">Large furniture and construction debris...</p>
-              <div className="issue-footer">
-                <ThumbsUp size={14} color="#64748b" />
-                <span>24 Citizens upvoted</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="issue-card">
-            <img 
-              src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=200" 
-              alt="Clean bins" 
-              className="issue-image filter-grayscale"
-            />
-            <div className="issue-content">
-              <div className="issue-meta">
-                <span className="status-badge status-resolved">RESOLVED</span>
-                <span className="distance">1.2 km away</span>
-              </div>
-              <h4 className="issue-title">Graffiti - Main Square</h4>
-              <p className="issue-desc">Wall cleaned by municipal team...</p>
-              <div className="issue-footer resolved-text">
-                <CheckCircle2 size={14} color="#21c45d" />
-                <span>Verified by 5 citizens</span>
-              </div>
-            </div>
-          </div>
-        </section>
-        
         {/* Extra padding for scroll */}
         <div style={{ height: '80px' }}></div>
       </main>

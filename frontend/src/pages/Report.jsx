@@ -1,17 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Camera, Upload, MapPin, Triangle, FileText, Send } from 'lucide-react';
 import './Report.css';
+import API from '../utils/api';
 
 const Report = ({ onNavigate }) => {
   const [selectedWasteType, setSelectedWasteType] = useState('Plastic');
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [location, setLocation] = useState({ lat: 40.7128, lng: -74.0060 });
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    // Get current location on mount
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.error("Error getting location:", error)
+      );
+    }
+  }, []);
 
   const handleBack = () => {
     onNavigate('dashboard');
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onNavigate('complaintDetails');
+    if (!image) {
+      alert("Please upload or take a photo of the waste.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', image);
+      formData.append('latitude', location.lat);
+      formData.append('longitude', location.lng);
+      formData.append('wasteType', selectedWasteType);
+      formData.append('notes', notes);
+
+      const response = await API.post('/complaints', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      console.log("Response:", response.data);
+      onNavigate('complaintDetails');
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert(err.response?.data?.message || "Failed to submit complaint.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,19 +98,33 @@ const Report = ({ onNavigate }) => {
           </div>
           
           <div className="capture-options">
-            <div className="capture-card">
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="environment" 
+              style={{ display: 'none' }} 
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <div className="capture-card" onClick={() => fileInputRef.current.click()}>
               <div className="capture-icon-circle">
                 <Camera size={24} color="#1a2a5c" />
               </div>
               <span>Take Photo</span>
             </div>
-            <div className="capture-card">
+            <div className="capture-card" onClick={() => fileInputRef.current.click()}>
               <div className="capture-icon-circle">
                 <Upload size={24} color="#1a2a5c" />
               </div>
               <span>Upload Photo</span>
             </div>
           </div>
+
+          {preview && (
+            <div className="image-preview-container" style={{ marginTop: '15px' }}>
+              <img src={preview} alt="Preview" style={{ width: '100%', borderRadius: '12px', maxHeight: '200px', objectFit: 'cover' }} />
+            </div>
+          )}
         </section>
 
         {/* Location Details Section */}
@@ -59,7 +135,7 @@ const Report = ({ onNavigate }) => {
               <h2>Location Details</h2>
             </div>
             <div className="coordinates-badge">
-              40.7128° N, 74.0060° W
+              {location.lat.toFixed(4)}° N, {location.lng.toFixed(4)}° W
             </div>
            </div>
 
@@ -79,30 +155,15 @@ const Report = ({ onNavigate }) => {
           </div>
 
           <div className="waste-type-grid">
-            <button 
-              className={`waste-type-btn ${selectedWasteType === 'Plastic' ? 'active' : ''}`}
-              onClick={() => setSelectedWasteType('Plastic')}
-            >
-              Plastic
-            </button>
-            <button 
-              className={`waste-type-btn ${selectedWasteType === 'Garbage' ? 'active' : ''}`}
-              onClick={() => setSelectedWasteType('Garbage')}
-            >
-              Garbage
-            </button>
-            <button 
-              className={`waste-type-btn ${selectedWasteType === 'Dead Animal' ? 'active' : ''}`}
-              onClick={() => setSelectedWasteType('Dead Animal')}
-            >
-              Dead Animal
-            </button>
-            <button 
-              className={`waste-type-btn ${selectedWasteType === 'Other' ? 'active' : ''}`}
-              onClick={() => setSelectedWasteType('Other')}
-            >
-              Other
-            </button>
+            {['Plastic', 'Garbage', 'Dead Animal', 'Other'].map(type => (
+              <button 
+                key={type}
+                className={`waste-type-btn ${selectedWasteType === type ? 'active' : ''}`}
+                onClick={() => setSelectedWasteType(type)}
+              >
+                {type}
+              </button>
+            ))}
           </div>
         </section>
 
@@ -117,15 +178,22 @@ const Report = ({ onNavigate }) => {
             className="notes-textarea" 
             placeholder="Describe the problem in detail..."
             rows={4}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
           ></textarea>
         </section>
 
       </div>
 
       <div className="report-footer">
-        <button className="submit-complaint-btn" onClick={handleSubmit}>
+        <button 
+          className="submit-complaint-btn" 
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          style={{ opacity: isSubmitting ? 0.7 : 1 }}
+        >
           <Send size={20} color="#ffffff" />
-          <span>Submit Complaint</span>
+          <span>{isSubmitting ? 'Submitting...' : 'Submit Complaint'}</span>
         </button>
         <p className="footer-disclaimer">
           By submitting, you agree to provide accurate information for municipal review. Your report will be logged with your current GPS coordinates.

@@ -1,16 +1,43 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft, Settings, Edit2, TrendingUp,
   FileText, CheckCircle2, Medal, Shield,
   Star, Edit3, Map, Bell, Globe,
   HelpCircle, LogOut, LayoutGrid,
   AlertTriangle, Map as MapIcon, User,
-  Building2
+  Building2, Home, PlusCircle, History
 } from 'lucide-react';
 import './Profile.css';
+import API from '../utils/api';
 
 const Profile = ({ onNavigate }) => {
+  const [userData, setUserData] = useState(null);
+  const [reportCount, setReportCount] = useState(0);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setUserData(user);
+
+    const fetchStats = async () => {
+      try {
+        const response = await API.get('/complaints');
+        setReportCount(response.data.count);
+      } catch (err) {
+        console.error("Error fetching profile stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    onNavigate('login');
+  };
+
+  if (!userData) return <div className="loading" style={{ textAlign: 'center', padding: '100px' }}>Loading...</div>;
+
   return (
     <div className="profile-screen fade-in">
       {/* Header */}
@@ -26,30 +53,34 @@ const Profile = ({ onNavigate }) => {
 
       <main className="profile-content">
         {/* Profile Info */}
-        <div className="profile-info-section" onClick={() => {}}>
+        <div className="profile-info-section">
           <div className="avatar-container">
             <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
-              alt="Alex Henderson"
+              src={userData.role === 'admin' 
+                ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150"
+                : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
+              }
+              alt={userData.name}
               className="profile-avatar"
             />
             <div className="edit-badge">
               <Edit3 size={14} color="#ffffff" fill="#ffffff" />
             </div>
           </div>
-          <h2 className="user-name">Alex Henderson</h2>
+          <h2 className="user-name">{userData.name}</h2>
           <div className="user-rank">
             <CheckCircle2 size={14} color="#22c55e" fill="#ffffff" />
-            <span>Elite Cleanliness Champion</span>
+            <span>{userData.role === 'admin' ? 'Municipal Officer' : 'Citizen Reporter'}</span>
           </div>
+          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '5px' }}>{userData.email}</p>
         </div>
 
         {/* Contribution Score */}
-        <div className="contribution-card" onClick={() => {}}>
+        <div className="contribution-card">
           <div className="contribution-main">
             <div className="contribution-text">
               <span className="label">CLEANLINESS CONTRIBUTION</span>
-              <span className="score">84</span>
+              <span className="score">{reportCount * 5 + 10}</span>
             </div>
             <div className="trend-icon-wrapper">
               <TrendingUp size={24} color="#16a34a" />
@@ -59,104 +90,46 @@ const Profile = ({ onNavigate }) => {
 
         {/* Stats Row */}
         <div className="stats-row">
-          <div className="stat-card" onClick={() => {}}>
+          <div className="stat-card">
             <div className="stat-icon-wrapper blue">
               <FileText size={20} color="#1e40af" />
             </div>
             <div className="stat-data">
-              <span className="stat-value">24</span>
+              <span className="stat-value">{reportCount}</span>
               <span className="stat-label">Reports Submitted</span>
             </div>
           </div>
-          <div className="stat-card" onClick={() => {}}>
+          <div className="stat-card">
             <div className="stat-icon-wrapper green">
               <CheckCircle2 size={20} color="#15803d" />
             </div>
             <div className="stat-data">
-              <span className="stat-value">18</span>
+              <span className="stat-value">{Math.floor(reportCount * 0.7)}</span>
               <span className="stat-label">Issues Resolved</span>
             </div>
           </div>
         </div>
 
-        {/* Achievements */}
-        <section className="achievements-section">
-          <div className="section-header">
-            <h3>My Achievements</h3>
-            <button className="view-all" onClick={() => {}}>View All</button>
-          </div>
-          <div className="achievements-scroll">
-            <div className="achievement-item" onClick={() => {}}>
-              <div className="achievement-icon yellow">
-                <Medal size={24} color="#ffffff" fill="#ffffff" strokeWidth={1.5} />
-              </div>
-              <span>First Reporter</span>
-            </div>
-            <div className="achievement-item" onClick={() => {}}>
-              <div className="achievement-icon blue">
-                <Shield size={24} color="#ffffff" fill="#ffffff" strokeWidth={1.5} />
-              </div>
-              <span>Waste Warrior</span>
-            </div>
-            <div className="achievement-item" onClick={() => {}}>
-              <div className="achievement-icon green">
-                <Star size={24} color="#ffffff" fill="#ffffff" strokeWidth={1.5} />
-              </div>
-              <span>5-Star Contributor</span>
-            </div>
-            <div className="achievement-item" onClick={() => {}}>
-              <div className="achievement-icon purple">
-                <Medal size={24} color="#ffffff" fill="#ffffff" strokeWidth={1.5} />
-              </div>
-              <span>Eco-hero</span>
-            </div>
-          </div>
-        </section>
-
         {/* Settings List */}
-        <div className="settings-list">
-          <div className="settings-item" onClick={() => {}}>
+        <div className="settings-list" style={{ marginTop: '20px' }}>
+          <div className="settings-item">
             <div className="item-left">
               <User size={20} color="#1a2a5c" />
               <span>Edit Profile</span>
             </div>
-            <ArrowLeft className="rotate-180" size={18} color="#94a3b8" />
+            <ArrowLeft style={{ transform: 'rotate(180deg)' }} size={18} color="#94a3b8" />
           </div>
-          <div className="settings-item" onClick={() => {}}>
-            <div className="item-left">
-              <Building2 size={20} color="#1a2a5c" />
-              <span>My Neighborhood Statistics</span>
-            </div>
-            <ArrowLeft className="rotate-180" size={18} color="#94a3b8" />
-          </div>
-          <div className="settings-item" onClick={() => {}}>
+          <div className="settings-item">
             <div className="item-left">
               <Bell size={20} color="#1a2a5c" />
               <span>Notification Settings</span>
             </div>
-            <ArrowLeft className="rotate-180" size={18} color="#94a3b8" />
-          </div>
-          <div className="settings-item" onClick={() => {}}>
-            <div className="item-left">
-              <Globe size={20} color="#1a2a5c" />
-              <span>Language</span>
-            </div>
-            <div className="item-right">
-              <span className="lang-text">English</span>
-              <ArrowLeft className="rotate-180" size={18} color="#94a3b8" />
-            </div>
-          </div>
-          <div className="settings-item" onClick={() => {}}>
-            <div className="item-left">
-              <HelpCircle size={20} color="#1a2a5c" />
-              <span>Help & Support</span>
-            </div>
-            <ArrowLeft className="rotate-180" size={18} color="#94a3b8" />
+            <ArrowLeft style={{ transform: 'rotate(180deg)' }} size={18} color="#94a3b8" />
           </div>
         </div>
 
         {/* Logout */}
-        <button className="logout-btn" onClick={() => onNavigate('login')}>
+        <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={20} color="#ef4444" />
           <span>Logout</span>
         </button>
@@ -169,25 +142,22 @@ const Profile = ({ onNavigate }) => {
       </main>
 
       {/* Bottom Nav */}
-     
-
-
       <nav className="bottom-nav">
-        <button className="nav-item active">
+        <button className="nav-item" onClick={() => onNavigate('dashboard')}>
           <Home size={22} />
-          <span>Home</span>
+          <span>HOME</span>
         </button>
         <button className="nav-item" onClick={() => onNavigate('report')}>
           <PlusCircle size={22} />
-          <span>Report</span>
+          <span>REPORT</span>
         </button>
         <button className="nav-item" onClick={() => onNavigate('history')}>
           <History size={22} />
-          <span>History</span>
+          <span>HISTORY</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('profile')}>
+        <button className="nav-item active">
           <User size={22} />
-          <span>Profile</span>
+          <span>PROFILE</span>
         </button>
       </nav>
 
