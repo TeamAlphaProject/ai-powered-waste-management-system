@@ -1,0 +1,161 @@
+.history-screen {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-header {
+  padding: 1.5rem 1.25rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.history-header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a2a5c;
+  margin: 0;
+}
+
+.header-spacer {
+  width: 24px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1.25rem 1.5rem;
+  background-color: #f8fafc;
+}
+
+.tab-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 100px;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.tab-btn.active {
+  background-color: #1a2a5c;
+  color: #ffffff;
+}
+
+/* List */
+.history-content {
+  flex: 1;
+  padding: 0 1.25rem;
+  overflow-y: auto;
+}
+
+.complaint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.complaint-item-card {
+  background: white;
+  border-radius: 16px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.complaint-item-card:active {
+  transform: scale(0.98);
+}
+
+.complaint-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.complaint-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.complaint-info {
+  flex: 1;
+}
+
+.complaint-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.complaint-date {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Status Pills */
+.status-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pill.pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.status-pill.in-progress {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.status-pill.resolved {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.complaint-arrow {
+  padding-right: 0.25rem;
+}
+
+.list-footer-spacer {
+  height: 100px;
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
