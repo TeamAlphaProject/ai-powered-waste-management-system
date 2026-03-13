@@ -1,44 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, Home, PlusCircle, History as HistoryIcon, User } from 'lucide-react';
 import './History.css';
+import API from '../utils/api';
 
 const History = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState('All');
+  const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const complaints = [
-    {
-      id: 1,
-      title: 'Illegal Dumping',
-      date: 'Oct 24, 2023 • 10:45 AM',
-      status: 'Pending',
-      image: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&q=80&w=300'
-    },
-    {
-      id: 2,
-      title: 'Overflowing Bin',
-      date: 'Oct 20, 2023 • 2:15 PM',
-      status: 'In Progress',
-      image: 'https://images.unsplash.com/photo-1595273670150-db0a3bf6907a?auto=format&fit=crop&q=80&w=300'
-    },
-    {
-      id: 3,
-      title: 'Bulk Waste Pickup',
-      date: 'Oct 15, 2023 • 9:00 AM',
-      status: 'Resolved',
-      image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=300'
-    },
-    {
-      id: 4,
-      title: 'Hazardous Waste',
-      date: 'Sep 28, 2023 • 4:30 PM',
-      status: 'Resolved',
-      image: 'https://images.unsplash.com/photo-1591193516411-ac669bc8a1ae?auto=format&fit=crop&q=80&w=300'
-    }
-  ];
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const response = await API.get('/complaints');
+        setComplaints(response.data.data);
+      } catch (err) {
+        console.error("Error fetching history:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
 
   const filteredComplaints = activeTab === 'All' 
     ? complaints 
-    : complaints.filter(c => c.status === activeTab);
+    : complaints.filter(c => {
+        if (activeTab === 'Active') return c.status === 'New' || c.status === 'In Progress';
+        if (activeTab === 'Resolved') return c.status === 'Resolved';
+        return true;
+      });
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    }) + ' • ' + date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit' 
+    });
+  };
 
   return (
     <div className="history-screen fade-in">
@@ -66,29 +69,39 @@ const History = ({ onNavigate }) => {
 
       {/* Complaint List */}
       <main className="history-content">
-        <div className="complaint-list">
-          {filteredComplaints.map(complaint => (
-            <div 
-              key={complaint.id} 
-              className="complaint-item-card"
-              onClick={() => onNavigate('complaintDetails')}
-            >
-              <div className="complaint-thumb">
-                <img src={complaint.image} alt={complaint.title} />
+        {isLoading ? (
+          <div className="loading-state" style={{ textAlign: 'center', marginTop: '40px' }}>
+            <p>Loading your reports...</p>
+          </div>
+        ) : complaints.length === 0 ? (
+          <div className="empty-state" style={{ textAlign: 'center', marginTop: '40px' }}>
+            <p>No reports found.</p>
+          </div>
+        ) : (
+          <div className="complaint-list">
+            {filteredComplaints.map(complaint => (
+              <div 
+                key={complaint._id} 
+                className="complaint-item-card"
+                onClick={() => onNavigate('complaintDetails', { complaintId: complaint._id })}
+              >
+                <div className="complaint-thumb">
+                  <img src={`http://localhost:5000${complaint.imageUrl}`} alt="Waste" />
+                </div>
+                <div className="complaint-info">
+                  <h3>{complaint.detectedObject === 'none' ? 'Waste Report' : complaint.detectedObject.replace('_', ' ')}</h3>
+                  <p className="complaint-date">{formatDate(complaint.createdAt)}</p>
+                  <span className={`status-pill ${complaint.status.toLowerCase().replace(' ', '-')}`}>
+                    {complaint.status}
+                  </span>
+                </div>
+                <div className="complaint-arrow">
+                  <ChevronRight size={20} color="#94a3b8" />
+                </div>
               </div>
-              <div className="complaint-info">
-                <h3>{complaint.title}</h3>
-                <p className="complaint-date">{complaint.date}</p>
-                <span className={`status-pill ${complaint.status.toLowerCase().replace(' ', '-')}`}>
-                  {complaint.status}
-                </span>
-              </div>
-              <div className="complaint-arrow">
-                <ChevronRight size={20} color="#94a3b8" />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         <div className="list-footer-spacer"></div>
       </main>
 

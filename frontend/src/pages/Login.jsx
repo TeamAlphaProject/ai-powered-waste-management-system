@@ -1,8 +1,25 @@
 import React from 'react';
 import { Info } from 'lucide-react';
 import './Login.css';
+import API from '../utils/api';
 
 const Login = ({ onNavigate }) => {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await API.post('/auth/login', { email, password });
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      onNavigate('dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed');
+    }
+  };
+
   return (
     <div className="login-screen fade-in">
       <div className="login-header">
@@ -25,6 +42,8 @@ const Login = ({ onNavigate }) => {
           <p>Help us keep your neighborhood clean by reporting waste issues instantly.</p>
         </div>
 
+        {error && <p className="error-message" style={{ color: '#ef4444', marginBottom: '10px', fontSize: '14px', textAlign: 'center' }}>{error}</p>}
+
         <button className="btn-oauth">
           <div className="google-icon">G</div>
           <span>Continue with Google</span>
@@ -34,15 +53,27 @@ const Login = ({ onNavigate }) => {
           <span>OR EMAIL</span>
         </div>
 
-        <form className="login-form" onSubmit={(e) => { e.preventDefault(); onNavigate(); }}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email Address</label>
-            <input type="email" placeholder="name@government.gov" required />
+            <input 
+              type="email" 
+              placeholder="name@government.gov" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required 
+            />
           </div>
 
           <div className="form-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" required />
+            <input 
+              type="password" 
+              placeholder="Enter your password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
+            />
           </div>
 
           <div className="forgot-password">
@@ -54,8 +85,8 @@ const Login = ({ onNavigate }) => {
           </button>
         </form>
 
-        <button className="btn-secondary" onClick={onNavigate}>
-          Continue as Guest
+        <button className="btn-secondary" onClick={() => onNavigate('adminLogin')}>
+          Admin / Officer Access
         </button>
 
         <div className="register-prompt">
