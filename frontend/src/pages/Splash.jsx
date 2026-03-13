@@ -6,7 +6,7 @@ const Splash = ({ onNavigate }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onNavigate();
-    }, 4000); // 4 seconds delay
+    }, 6000); //  seconds delay
     return () => clearTimeout(timer);
   }, [onNavigate]);
 

@@ -169,11 +169,11 @@ const Dashboard = ({ onNavigate }) => {
           <PlusCircle size={22} />
           <span>Report</span>
         </button>
-        <button className="nav-item">
+        <button className="nav-item" onClick={() => onNavigate('history')}>
           <History size={22} />
           <span>History</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('login')}>
+        <button className="nav-item" onClick={() => onNavigate('profile')}>
           <User size={22} />
           <span>Profile</span>
         </button>
