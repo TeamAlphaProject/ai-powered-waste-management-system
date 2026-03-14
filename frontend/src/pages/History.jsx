@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Home, PlusCircle, History as HistoryIcon, User } from 'lucide-react';
 import './History.css';
 import API from '../utils/api';
 
-const History = ({ onNavigate }) => {
+const History = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('All');
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +49,7 @@ const History = ({ onNavigate }) => {
     <div className="history-screen fade-in">
       {/* Header */}
       <header className="history-header">
-        <button className="back-btn" onClick={() => onNavigate('dashboard')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={24} color="#1a2a5c" />
         </button>
         <h1>My Reports</h1>
@@ -83,7 +85,7 @@ const History = ({ onNavigate }) => {
               <div 
                 key={complaint._id} 
                 className="complaint-item-card"
-                onClick={() => onNavigate('complaintDetails', { complaintId: complaint._id })}
+                onClick={() => navigate(`/complaint/${complaint._id}`)}
               >
                 <div className="complaint-thumb">
                   <img src={`http://localhost:5000${complaint.imageUrl}`} alt="Waste" />
@@ -107,11 +109,11 @@ const History = ({ onNavigate }) => {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <button className="nav-item" onClick={() => onNavigate('dashboard')}>
+        <button className="nav-item" onClick={() => navigate('/dashboard')}>
           <Home size={22} />
           <span>HOME</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('report')}>
+        <button className="nav-item" onClick={() => navigate('/report')}>
           <PlusCircle size={22} />
           <span>REPORT</span>
         </button>
@@ -119,7 +121,7 @@ const History = ({ onNavigate }) => {
           <HistoryIcon size={22} />
           <span>HISTORY</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('profile')}>
+        <button className="nav-item" onClick={() => navigate('/profile')}>
           <User size={22} />
           <span>PROFILE</span>
         </button>

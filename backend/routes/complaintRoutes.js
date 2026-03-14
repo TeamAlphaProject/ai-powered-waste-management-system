@@ -38,7 +38,6 @@ router.route('/')
   .post(protect, upload.single('image'), createComplaint)
   .get(protect, getComplaints);
 
-router.route('/:id')
-  .put(protect, authorize('admin'), updateComplaintStatus);
+router.patch('/:id/status', protect, authorize('admin'), updateComplaintStatus);
 
 module.exports = router;

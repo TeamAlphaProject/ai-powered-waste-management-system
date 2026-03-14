@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trash2, Building2, Leaf, ShieldCheck, Clock } from 'lucide-react';
 import './Splash.css';
 
-const Splash = ({ onNavigate }) => {
+const Splash = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onNavigate();
-    }, 6000); //  seconds delay
+      navigate('/login');
+    }, 6000); // 6 seconds delay
     return () => clearTimeout(timer);
-  }, [onNavigate]);
+  }, [navigate]);
 
   return (
-    <div className="splash-screen" onClick={onNavigate}>
+    <div className="splash-screen" onClick={() => navigate('/login')}>
       <div className="status-bar">
         <div className="status-icons">
           <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">

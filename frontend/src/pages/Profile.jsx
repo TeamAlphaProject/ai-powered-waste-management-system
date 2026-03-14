@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Settings, Edit2, TrendingUp,
   FileText, CheckCircle2, Medal, Shield,
@@ -10,7 +11,8 @@ import {
 import './Profile.css';
 import API from '../utils/api';
 
-const Profile = ({ onNavigate }) => {
+const Profile = () => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [reportCount, setReportCount] = useState(0);
 
@@ -33,7 +35,7 @@ const Profile = ({ onNavigate }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    onNavigate('login');
+    navigate('/login');
   };
 
   if (!userData) return <div className="loading" style={{ textAlign: 'center', padding: '100px' }}>Loading...</div>;
@@ -42,7 +44,7 @@ const Profile = ({ onNavigate }) => {
     <div className="profile-screen fade-in">
       {/* Header */}
       <header className="profile-header">
-        <button className="icon-btn" onClick={() => onNavigate('dashboard')}>
+        <button className="icon-btn" onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={24} color="#1a2a5c" />
         </button>
         <h1>Profile</h1>
@@ -143,15 +145,15 @@ const Profile = ({ onNavigate }) => {
 
       {/* Bottom Nav */}
       <nav className="bottom-nav">
-        <button className="nav-item" onClick={() => onNavigate('dashboard')}>
+        <button className="nav-item" onClick={() => navigate('/dashboard')}>
           <Home size={22} />
           <span>HOME</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('report')}>
+        <button className="nav-item" onClick={() => navigate('/report')}>
           <PlusCircle size={22} />
           <span>REPORT</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('history')}>
+        <button className="nav-item" onClick={() => navigate('/history')}>
           <History size={22} />
           <span>HISTORY</span>
         </button>

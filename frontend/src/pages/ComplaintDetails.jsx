@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, CheckCircle2, User, Paintbrush, Clock, Info, MapPin, Navigation } from 'lucide-react';
 import './ComplaintDetails.css';
 import API from '../utils/api';
 
-const ComplaintDetails = ({ onNavigate, complaintId }) => {
+const ComplaintDetails = ({ complaintId: propId }) => {
+  const navigate = useNavigate();
+  const { complaintId: paramId } = useParams();
+  const complaintId = paramId || propId;
+  
   const [complaint, setComplaint] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +34,7 @@ const ComplaintDetails = ({ onNavigate, complaintId }) => {
   if (!complaint) return (
     <div className="error" style={{ textAlign: 'center', padding: '100px' }}>
       <p>Report details not found.</p>
-      <button onClick={() => onNavigate('dashboard')}>Back Home</button>
+      <button onClick={() => navigate('/dashboard')}>Back Home</button>
     </div>
   );
 
@@ -46,7 +51,7 @@ const ComplaintDetails = ({ onNavigate, complaintId }) => {
       
       {/* Header */}
       <header className="page-header sticky-header">
-        <button className="back-button" onClick={() => onNavigate('dashboard')}>
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={24} color="#1a2a5c" />
         </button>
         <h1 className="page-title">Complaint Details</h1>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
   User, 
@@ -16,9 +17,10 @@ import {
   Clock
 } from 'lucide-react';
 import './AdminDashboard.css';
-import API from '../utils/api';
+import API from '../../utils/api';
 
-const AdminDashboard = ({ onNavigate }) => {
+const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, l1: 0, l2: 0, l3: 0 });
   const [criticalComplaints, setCriticalComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,7 +93,7 @@ const AdminDashboard = ({ onNavigate }) => {
       <div className="dashboard-scroll-content">
         {/* Priority Stats Cards */}
         <section className="stats-grid">
-          <div className="stat-card total" onClick={() => onNavigate('adminIssueList', { level: 'all' })}>
+          <div className="stat-card total" onClick={() => navigate('/admin/issues/all')}>
             <div className="stat-card-header">
               <span className="stat-label">TOTAL ISSUES</span>
               <ClipboardList size={20} color="#1a2a5c" />
@@ -103,7 +105,7 @@ const AdminDashboard = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="stat-card l1" onClick={() => onNavigate('adminIssueList', { level: 'L1' })}>
+          <div className="stat-card l1" onClick={() => navigate('/admin/issues/L1')}>
             <div className="stat-card-header">
               <span className="stat-label">ROUTINE (L1)</span>
               <CheckCircle2 size={20} color="#21c45d" />
@@ -112,7 +114,7 @@ const AdminDashboard = ({ onNavigate }) => {
             <div className="stat-subtext">Stable resolution rate</div>
           </div>
 
-          <div className="stat-card l2" onClick={() => onNavigate('adminIssueList', { level: 'L2' })}>
+          <div className="stat-card l2" onClick={() => navigate('/admin/issues/L2')}>
             <div className="stat-card-header">
               <span className="stat-label">URGENT (L2)</span>
               <AlertTriangle size={20} color="#f59e0b" />
@@ -123,7 +125,7 @@ const AdminDashboard = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="stat-card l3" onClick={() => onNavigate('adminIssueList', { level: 'L3' })}>
+          <div className="stat-card l3" onClick={() => navigate('/admin/issues/L3')}>
             <div className="stat-card-header">
               <span className="stat-label">EMERGENCY (L3)</span>
               <Zap size={20} color="#ef4444" />
@@ -200,7 +202,7 @@ const AdminDashboard = ({ onNavigate }) => {
         <section className="dashboard-section last-section">
           <div className="section-header">
             <h3>Recent Critical Complaints</h3>
-            <button className="text-btn" onClick={() => onNavigate('adminIssueList', { level: 'L3' })}>View All</button>
+            <button className="text-btn" onClick={() => navigate('/admin/issues/L3')}>View All</button>
           </div>
           <div className="critical-complaints-list">
             {isLoading ? (
@@ -209,7 +211,7 @@ const AdminDashboard = ({ onNavigate }) => {
                <p style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>No active emergencies detected.</p>
             ) : (
               criticalComplaints.map(complaint => (
-                <div key={complaint._id} className="critical-item" onClick={() => onNavigate('adminIssueDetail', { complaintId: complaint._id })}>
+                <div key={complaint._id} className="critical-item" onClick={() => navigate(`/admin/issue/${complaint._id}`)}>
                   <div className="item-icon l3"><Zap size={20} color="#ef4444" /></div>
                   <div className="item-info">
                     <h4>{complaint.detectedObject === 'none' ? 'Emergency Alert' : complaint.detectedObject.replace('_', ' ')}</h4>
@@ -226,7 +228,7 @@ const AdminDashboard = ({ onNavigate }) => {
 
       {/* Bottom Nav */}
       <nav className="admin-bottom-nav">
-        <button className="nav-item active">
+        <button className="nav-item active" onClick={() => navigate('/admin/dashboard')}>
           <LayoutDashboard size={24} />
           <span>OVERVIEW</span>
         </button>

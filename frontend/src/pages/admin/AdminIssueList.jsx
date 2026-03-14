@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Bell, 
@@ -21,9 +22,13 @@ import {
   Info
 } from 'lucide-react';
 import './AdminIssueList.css';
-import API from '../utils/api';
+import API from '../../utils/api';
 
-const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
+const AdminIssueList = ({ level: propLevel }) => {
+  const navigate = useNavigate();
+  const { level: paramLevel } = useParams();
+  const level = paramLevel || propLevel || 'L1';
+  
   const [activeTab, setActiveTab] = useState('All');
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +40,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
         const allData = response.data.data;
         
         // Map priority levels to wasteLevel numbers
-        const levelMap = { 'L1': 1, 'L2': 2, 'L3': 3 };
+        const levelMap = { 'L1': 1, 'L2': 2, 'L3': 3, 'all': 0 };
         const targetLevel = levelMap[level] || 0;
         
         const filtered = targetLevel === 0 
@@ -68,7 +73,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
       case 'L2':
         return (
           <header className="page-header sticky-header">
-            <button className="back-btn" onClick={() => onNavigate('adminDashboard')}>
+            <button className="back-btn" onClick={() => navigate('/admin/dashboard')}>
               <ArrowLeft size={24} color="#1a2a5c" />
             </button>
             <div className="header-center">
@@ -84,7 +89,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
       case 'L3':
         return (
           <header className="page-header sticky-header">
-            <button className="back-btn" onClick={() => onNavigate('adminDashboard')}>
+            <button className="back-btn" onClick={() => navigate('/admin/dashboard')}>
               <ArrowLeft size={24} color="#1a2a5c" />
             </button>
             <div className="header-center">
@@ -97,13 +102,13 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
             </div>
           </header>
         );
-      default: // L1
+      default: // L1 or all
         return (
           <header className="page-header sticky-header">
-            <button className="back-btn" onClick={() => onNavigate('adminDashboard')}>
+            <button className="back-btn" onClick={() => navigate('/admin/dashboard')}>
               <ArrowLeft size={24} color="#1a2a5c" />
             </button>
-            <h1 className="page-title">Routine Issues (L1)</h1>
+            <h1 className="page-title">{level === 'all' ? 'All Issues' : 'Routine Issues (L1)'}</h1>
             <Bell size={24} color="#1a2a5c" />
           </header>
         );
@@ -163,7 +168,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
         <div className="stat-card-white">
           <div className="stat-icon-row">
             <Trash2 size={20} color="#1a2a5c" />
-            <span className="stat-label">Total Routine</span>
+            <span className="stat-label">Total Reports</span>
           </div>
           <div className="stat-main-value">{complaints.length} <span className="stat-percent">+12%</span></div>
         </div>
@@ -179,7 +184,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
   };
 
   const renderFilters = () => {
-    if (level === 'L1') {
+    if (level === 'L1' || level === 'all') {
       return (
         <div className="filter-chips">
           <button className={`chip select ${activeTab === 'All' ? 'active' : ''}`} onClick={() => setActiveTab('All')}>
@@ -223,7 +228,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
       <div className="issue-list-container">
         {complaints.map(complaint => (
           level === 'L3' ? (
-            <div className="l3-issue-card" key={complaint._id} onClick={() => onNavigate('adminIssueDetail', { complaintId: complaint._id })}>
+            <div className="l3-issue-card" key={complaint._id} onClick={() => navigate(`/admin/issue/${complaint._id}`)}>
               <div className="l3-card-top">
                 <span className="status-dot"></span>
                 <span className="report-badge">{complaint.status}</span>
@@ -247,7 +252,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
               </div>
             </div>
           ) : level === 'L2' ? (
-            <div className="l2-issue-card" key={complaint._id} onClick={() => onNavigate('adminIssueDetail', { complaintId: complaint._id })}>
+            <div className="l2-issue-card" key={complaint._id} onClick={() => navigate(`/admin/issue/${complaint._id}`)}>
               <div className="l2-left">
                 <span className="issue-id">#U-{complaint._id.slice(-4).toUpperCase()}</span>
                 <span className="badge-urgent">URGENT</span>
@@ -262,7 +267,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
               </div>
             </div>
           ) : (
-            <div className="l1-issue-card" key={complaint._id} onClick={() => onNavigate('adminIssueDetail', { complaintId: complaint._id })}>
+            <div className="l1-issue-card" key={complaint._id} onClick={() => navigate(`/admin/issue/${complaint._id}`)}>
               <div className="issue-image-box">
                 <img src={`http://localhost:5000${complaint.imageUrl}`} alt="Waste" />
               </div>
@@ -287,7 +292,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
   const renderBottomNav = () => {
     return (
       <nav className="admin-bottom-nav">
-        <button className="nav-item" onClick={() => onNavigate('adminDashboard')}>
+        <button className="nav-item" onClick={() => navigate('/admin/dashboard')}>
           <LayoutDashboard size={24} />
           <span>DASHBOARD</span>
         </button>
@@ -303,7 +308,7 @@ const AdminIssueList = ({ onNavigate, level = 'L1' }) => {
           {level === 'L2' ? <User size={24} /> : level === 'L1' ? <BarChart3 size={24} /> : <Zap size={24} />}
           <span>{level === 'L2' ? 'PROFILE' : level === 'L1' ? 'REPORTS' : 'UNITS'}</span>
         </button>
-        {level === 'L1' && (
+        {(level === 'L1' || level === 'all') && (
           <button className="nav-item">
             <Settings size={24} />
             <span>SETTINGS</span>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, Bell, MapPin, Trash2, Megaphone, 
   Star, MessageCircle, Map as MapIcon, 
@@ -8,7 +9,8 @@ import {
 import './Dashboard.css';
 import API from '../utils/api';
 
-const Dashboard = ({ onNavigate }) => {
+const Dashboard = () => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +48,7 @@ const Dashboard = ({ onNavigate }) => {
             }
             alt="User Avatar" 
             className="avatar"
-            onClick={() => onNavigate('profile')}
+            onClick={() => navigate('/profile')}
           />
           <div className="user-details">
             <h2>Welcome, {userData?.name?.split(' ')[0] || 'User'}</h2>
@@ -82,7 +84,7 @@ const Dashboard = ({ onNavigate }) => {
               <Trash2 size={24} color="#ffffff" />
             </div>
           </div>
-          <button className="report-btn" onClick={() => onNavigate('report')}>
+          <button className="report-btn" onClick={() => navigate('/report')}>
             <Megaphone size={18} fill="#ffffff" color="#ffffff"/>
             <span>Report Waste Issue</span>
           </button>
@@ -109,7 +111,7 @@ const Dashboard = ({ onNavigate }) => {
         <section className="section-container">
           <div className="section-header">
             <h3 className="section-title">Latest Updates</h3>
-            <span className="badge purple" onClick={() => onNavigate('history')}>{activeCount} Active</span>
+            <span className="badge purple" onClick={() => navigate('/history')}>{activeCount} Active</span>
           </div>
           {isLoading ? (
             <p style={{ padding: '10px' }}>Loading updates...</p>
@@ -117,7 +119,7 @@ const Dashboard = ({ onNavigate }) => {
             <p style={{ padding: '10px', color: '#64748b' }}>No recent activity.</p>
           ) : (
             complaints.map(complaint => (
-              <div key={complaint._id} className="complaint-card" onClick={() => onNavigate('complaintDetails', { complaintId: complaint._id })}>
+              <div key={complaint._id} className="complaint-card" onClick={() => navigate(`/complaint/${complaint._id}`)}>
                 <div className={`complaint-icon-wrapper ${complaint.status === 'Resolved' ? 'green' : 'orange'}`}>
                   <MessageCircle size={18} color={complaint.status === 'Resolved' ? '#16a34a' : '#ea580c'} fill={complaint.status === 'Resolved' ? '#16a34a' : '#ea580c'} />
                 </div>
@@ -134,7 +136,7 @@ const Dashboard = ({ onNavigate }) => {
         <section className="section-container">
           <div className="section-header">
             <h3 className="section-title">Nearby Activity</h3>
-            <a href="#" className="view-link">View Map</a>
+            <span className="view-link" onClick={() => navigate('/dashboard')}>View Map</span>
           </div>
           <div className="map-card">
              {/* Map Image Placeholder */}
@@ -154,19 +156,19 @@ const Dashboard = ({ onNavigate }) => {
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
-        <button className="nav-item active">
+        <button className="nav-item active" onClick={() => navigate('/dashboard')}>
           <Home size={22} />
           <span>Home</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('report')}>
+        <button className="nav-item" onClick={() => navigate('/report')}>
           <PlusCircle size={22} />
           <span>Report</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('history')}>
+        <button className="nav-item" onClick={() => navigate('/history')}>
           <History size={22} />
           <span>History</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('profile')}>
+        <button className="nav-item" onClick={() => navigate('/profile')}>
           <User size={22} />
           <span>Profile</span>
         </button>
