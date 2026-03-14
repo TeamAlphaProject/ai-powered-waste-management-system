@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import './Login.css';
 import API from '../utils/api';
 
-const Login = ({ onNavigate }) => {
+const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
@@ -14,7 +16,7 @@ const Login = ({ onNavigate }) => {
       const response = await API.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data));
-      onNavigate('dashboard');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
@@ -77,7 +79,7 @@ const Login = ({ onNavigate }) => {
           </div>
 
           <div className="forgot-password">
-            <a href="#">Forgot password?</a>
+            <Link to="#">Forgot password?</Link>
           </div>
 
           <button type="submit" className="btn-primary">
@@ -85,21 +87,21 @@ const Login = ({ onNavigate }) => {
           </button>
         </form>
 
-        <button className="btn-secondary" onClick={() => onNavigate('adminLogin')}>
+        <button className="btn-secondary" onClick={() => navigate('/admin/login')}>
           Admin / Officer Access
         </button>
 
         <div className="register-prompt">
-          Don't have an account? <a href="#">Register now</a>
+          Don't have an account? <Link to="/registration">Register now</Link>
         </div>
       </div>
 
       <div className="login-footer">
         <p>© 2024 Antigravity Smart Systems. Official Government Partner.</p>
         <div className="footer-links">
-          <a href="#">Privacy Policy</a>
+          <Link to="#">Privacy Policy</Link>
           <span>•</span>
-          <a href="#">Terms of Service</a>
+          <Link to="#">Terms of Service</Link>
         </div>
       </div>
     </div>

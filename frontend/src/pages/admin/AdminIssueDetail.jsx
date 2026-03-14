@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   MoreVertical, 
@@ -17,16 +18,17 @@ import {
 import './AdminIssueDetail.css';
 import API from '../../utils/api';
 
-const AdminIssueDetail = ({ onNavigate, complaintId }) => {
+const AdminIssueDetail = ({ complaintId: propId }) => {
+  const navigate = useNavigate();
+  const { complaintId: paramId } = useParams();
+  const complaintId = paramId || propId;
+  
   const [complaint, setComplaint] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        // Fetch all and filter for now as there's no specific GET /api/complaints/:id yet
-        // But for better performance, I'll assume we might need to add that route or just filter.
-        // Actually, let's just filter for now since we have the list.
         const response = await API.get('/complaints');
         const found = response.data.data.find(c => c._id === complaintId);
         setComplaint(found);
@@ -57,7 +59,7 @@ const AdminIssueDetail = ({ onNavigate, complaintId }) => {
   if (!complaint) return (
     <div className="error" style={{ textAlign: 'center', padding: '100px' }}>
       <p>Issue not found.</p>
-      <button onClick={() => onNavigate('adminDashboard')}>Back to safety</button>
+      <button onClick={() => navigate('/admin/dashboard')}>Back to safety</button>
     </div>
   );
 
@@ -65,7 +67,7 @@ const AdminIssueDetail = ({ onNavigate, complaintId }) => {
     <div className="admin-issue-detail-screen fade-in">
       {/* Header */}
       <header className="page-header sticky-header">
-        <button className="back-btn" onClick={() => onNavigate('adminIssueList')}>
+        <button className="back-btn" onClick={() => navigate('/admin/issues')}>
           <ArrowLeft size={24} color="#1a2a5c" />
         </button>
         <div className="header-info">
@@ -147,7 +149,7 @@ const AdminIssueDetail = ({ onNavigate, complaintId }) => {
 
       {/* Bottom Nav */}
       <nav className="admin-bottom-nav">
-        <button className="nav-item" onClick={() => onNavigate('adminDashboard')}>
+        <button className="nav-item" onClick={() => navigate('/admin/dashboard')}>
           <Building2 size={24} />
           <span>Dashboard</span>
         </button>
@@ -159,7 +161,7 @@ const AdminIssueDetail = ({ onNavigate, complaintId }) => {
           <BarChart3 size={24} />
           <span>Reports</span>
         </button>
-        <button className="nav-item" onClick={() => onNavigate('profile')}>
+        <button className="nav-item" onClick={() => navigate('/profile')}>
           <User size={24} />
           <span>Profile</span>
         </button>

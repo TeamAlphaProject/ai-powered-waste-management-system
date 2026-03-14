@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Upload, MapPin, Triangle, FileText, Send } from 'lucide-react';
 import './Report.css';
 import API from '../utils/api';
 
-const Report = ({ onNavigate }) => {
+const Report = () => {
+  const navigate = useNavigate();
   const [selectedWasteType, setSelectedWasteType] = useState('Plastic');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -28,7 +30,7 @@ const Report = ({ onNavigate }) => {
   }, []);
 
   const handleBack = () => {
-    onNavigate('dashboard');
+    navigate('/dashboard');
   };
 
   const handleFileChange = (e) => {
@@ -67,7 +69,12 @@ const Report = ({ onNavigate }) => {
       });
 
       console.log("Response:", response.data);
-      onNavigate('complaintDetails');
+      const newComplaint = response.data.data;
+      if (newComplaint && newComplaint._id) {
+        navigate(`/complaint/${newComplaint._id}`);
+      } else {
+        navigate('/history');
+      }
     } catch (err) {
       console.error("Upload error:", err);
       alert(err.response?.data?.message || "Failed to submit complaint.");

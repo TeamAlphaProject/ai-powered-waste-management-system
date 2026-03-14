@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Building2, Lock, ArrowRight } from 'lucide-react';
 import './AdminLogin.css';
 import API from '../../utils/api';
 
-const AdminLogin = ({ onNavigate }) => {
+const AdminLogin = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +22,7 @@ const AdminLogin = ({ onNavigate }) => {
       
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data));
-      onNavigate('adminDashboard');
+      navigate('/admin/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     }
@@ -29,7 +31,7 @@ const AdminLogin = ({ onNavigate }) => {
   return (
     <div className="admin-login-screen fade-in">
       <div className="admin-login-header">
-        <button className="back-btn" onClick={() => onNavigate('login')}>
+        <button className="back-btn" onClick={() => navigate('/login')}>
           <ArrowLeft size={24} color="#1a2a5c" />
         </button>
         <span className="brand-name">Antigravity Smart Waste</span>
@@ -84,7 +86,7 @@ const AdminLogin = ({ onNavigate }) => {
           </button>
         </form>
 
-        <button className="btn-text-secondary" onClick={() => onNavigate('login')}>
+        <button className="btn-text-secondary" onClick={() => navigate('/login')}>
           <ArrowLeft size={16} />
           <span>Return to Citizen Login</span>
         </button>
