@@ -25,8 +25,4 @@ All routes supported by the frontend application:
 - **Container**: Mobile-responsive layout defined in `App.jsx`
 
 
- { path: '/custom/path/.env' }
-MongoDB Connected for seeding...
-Officer account created successfully:
-Email: officer@city.gov
-Password: officerpassword123
+ 
